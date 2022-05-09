@@ -1,0 +1,38 @@
+version: "3.4"
+
+services:
+  consumer:
+    image: simple-message:consumer
+    restart: always
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python consumer.py
+    depends_on:
+      - rabbitMQ
+
+  producer:
+    image: simple-message:producer
+    restart: always
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python producer.py
+    depends_on:
+      - rabbitMQ
+      - consumer
+
+  rabbitMQ:
+    image: rabbitmq:3.8.30-management-alpine
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - ${RABBITMQ_PORT}:5672
+      - ${RABBITMQ_PORT_WEB}:15672
