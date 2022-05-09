@@ -1,0 +1,5 @@
+autopep8==1.6.0
+pika==1.2.1
+pycodestyle==2.8.0
+python-dotenv==0.20.0
+toml==0.10.2
