@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 import random
 import json
 
-
-def DefinicaoEnv():
 load_dotenv()
 user = os.getenv("RABBITMQ_USER")
 passwd = os.getenv("RABBITMQ_PASS")
@@ -18,10 +16,33 @@ rounds = int(os.getenv("MAX_RUNS"))
 
 credenciais = pika.PlainCredentials(user, passwd)
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(server, port, '/', credenciais))
-channel = connection.channel()
-
-channel.queue_declare(queue=queue)
+def GeradorNomeCompleto():
+    random.seed()
+    nome = (
+        "Maria",
+        "Jose",
+        "Ana",
+        "Joao",
+        "Antonio",
+        "Francisco",
+        "Carlos",
+        "Paulo",
+        "Pedro",
+        "Lucas",
+        "Luiz",
+        "Marcos",
+        "Luis",
+        "Gabriel",
+        "Rafael",
+        "Francisca",
+        "Daniel",
+        "Marcelo",
+        "Bruno",
+        "Eduardo"
+    )
+    particula = (" de ", " da ", " do ", " ")
+    sobrenome = ("Jesus", "Menezes", "Silva", "Oliveira", "Matos", "Meneses")
+    return str().join(random.sample(nome, 1) + random.sample(particula, 1) + random.sample(sobrenome, 1))
 for i in range(rounds):
 
     random.seed()
