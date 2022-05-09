@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import random
 import json
 
+
+def DefinicaoEnv():
 load_dotenv()
 user = os.getenv("RABBITMQ_USER")
 passwd = os.getenv("RABBITMQ_PASS")
