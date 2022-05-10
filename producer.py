@@ -121,4 +121,11 @@ class PubSub:
 
 
 if __name__ == '__main__':
-    MensageriaSimples()
+    mode = sys.argv[1].upper()
+    print(f'MODE: {mode}')
+    if mode == 'PUB_SUB':
+        PubSub()
+    elif mode == 'WORK_QUEUES':
+        MensageriaSimples()
+    else:
+        MensageriaSimples()
