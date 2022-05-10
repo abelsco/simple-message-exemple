@@ -4,6 +4,7 @@ import pika
 from dotenv import load_dotenv
 import random
 import json
+import sys
 
 
 def DefinicaoEnv():
