@@ -4,37 +4,128 @@ import pika
 from dotenv import load_dotenv
 import random
 import json
-
-load_dotenv()
-user = os.getenv("RABBITMQ_USER")
-passwd = os.getenv("RABBITMQ_PASS")
-server = os.getenv("RABBITMQ_SERVER")
-port = os.getenv("RABBITMQ_PORT")
-queue = os.getenv("RABBITMQ_NAME_QUEUE")
-rounds = int(os.getenv("MAX_RUNS"))
+import sys
 
 
-credenciais = pika.PlainCredentials(user, passwd)
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(server, port, '/', credenciais))
-channel = connection.channel()
+def DefinicaoEnv():
+    load_dotenv()
+    config = {
+        "user": os.getenv("RABBITMQ_USER"),
+        "passwd": os.getenv("RABBITMQ_PASS"),
+        "server": os.getenv("RABBITMQ_SERVER"),
+        "port": os.getenv("RABBITMQ_PORT"),
+        "queue": os.getenv("RABBITMQ_NAME_QUEUE"),
+        "exchange": os.getenv("RABBITMQ_NAME_EXCHANGE"),
+        "rounds": int(os.getenv("MAX_RUNS")),
+    }
+    return config
 
-channel.queue_declare(queue=queue)
-for i in range(rounds):
 
+def GeradorNomeCompleto():
     random.seed()
-    api = [
-        {"status": 200,
-         "data": {
-             "name": "Abel Menezes",
-             "valor": random.sample(range(100), 1),
-             "parcelas": random.sample(range(10), 1)
-         }
-         },
-    ]
-    # print(f"[x] {item}")
-    channel.basic_publish(exchange='', routing_key=queue,
-                          body=json.dumps(api))
-    print(f"[x] Enviando '{api}'")
+    nome = (
+        "Maria",
+        "Jose",
+        "Ana",
+        "Joao",
+        "Antonio",
+        "Francisco",
+        "Carlos",
+        "Paulo",
+        "Pedro",
+        "Lucas",
+        "Luiz",
+        "Marcos",
+        "Luis",
+        "Gabriel",
+        "Rafael",
+        "Francisca",
+        "Daniel",
+        "Marcelo",
+        "Bruno",
+        "Eduardo"
+    )
+    particula = (" de ", " da ", " do ", " ")
+    sobrenome = ("Jesus", "Menezes", "Silva", "Oliveira", "Matos", "Meneses")
+    return str().join(random.sample(nome, 1) + random.sample(particula, 1) + random.sample(sobrenome, 1))
 
-connection.close()
+
+def SimulaDadosAPI():
+    random.seed()
+    api = [{
+        "status": 200,
+        "data": {
+            "name": GeradorNomeCompleto(),
+            "pedido_id": random.sample(range(100), 1),
+            "cartao": {
+                "valor": random.sample(range(100), 1),
+                "parcelas": random.sample(range(10), 1),
+                "bandeira": "We gonna be ok",
+                "num": random.sample(range(1000, 5000), 4),
+                "cvv": random.sample(range(100, 300), 1)
+            }
+        }
+    }]
+    return api
+
+
+class MensageriaSimples:
+    def __init__(self, *args, **kwargs):
+        self.config = DefinicaoEnv()
+        self.conexao = self.AbrirConexao()
+        self.canal = self.conexao.channel()
+        self.EnviaMensagem()
+
+    def AbrirConexao(self):
+        credenciais = pika.PlainCredentials(
+            self.config["user"], self.config["passwd"])
+        conexao = pika.BlockingConnection(pika.ConnectionParameters(
+            self.config["server"], self.config["port"], '/', credenciais))
+        return conexao
+
+    def EnviaMensagem(self):
+        self.canal.queue_declare(queue=self.config["queue"])
+        for _ in range(self.config["rounds"]):
+            dados = SimulaDadosAPI()
+            self.canal.basic_publish(exchange='', routing_key=self.config["queue"],
+                                     body=json.dumps(dados))
+            print(f"[x] Enviando '{dados}'")
+
+        self.conexao.close()
+
+
+class PubSub:
+    def __init__(self, *args, **kwargs):
+        self.config = DefinicaoEnv()
+        self.conexao = self.AbrirConexao()
+        self.canal = self.conexao.channel()
+        self.EnviaMensagem()
+
+    def AbrirConexao(self):
+        credenciais = pika.PlainCredentials(
+            self.config["user"], self.config["passwd"])
+        conexao = pika.BlockingConnection(pika.ConnectionParameters(
+            self.config["server"], self.config["port"], '/', credenciais))
+        return conexao
+
+    def EnviaMensagem(self):
+        self.canal.exchange_declare(
+            exchange=self.config["exchange"], exchange_type='fanout')
+        for _ in range(self.config["rounds"]):
+            dados = SimulaDadosAPI()
+            self.canal.basic_publish(exchange=self.config["exchange"], routing_key='',
+                                     body=json.dumps(dados))
+            print(f"[x] Enviando '{dados}'")
+
+        self.conexao.close()
+
+
+if __name__ == '__main__':
+    mode = sys.argv[1].upper()
+    print(f'MODE: {mode}')
+    if mode == 'PUB_SUB':
+        PubSub()
+    elif mode == 'WORK_QUEUES':
+        MensageriaSimples()
+    else:
+        MensageriaSimples()

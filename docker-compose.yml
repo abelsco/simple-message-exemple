@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: python consumer.py
+    command: python consumer.py ${OPERATION_MODE}
     depends_on:
       - rabbitMQ
 
@@ -21,7 +21,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: python producer.py
+    command: python producer.py ${OPERATION_MODE}
     depends_on:
       - rabbitMQ
       - consumer
