@@ -3,6 +3,7 @@ import pika
 import sys
 import os
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 user = os.getenv("RABBITMQ_USER")
