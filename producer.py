@@ -15,6 +15,7 @@ def DefinicaoEnv():
         "server": os.getenv("RABBITMQ_SERVER"),
         "port": os.getenv("RABBITMQ_PORT"),
         "queue": os.getenv("RABBITMQ_NAME_QUEUE"),
+        "exchange": os.getenv("RABBITMQ_NAME_EXCHANGE"),
         "rounds": int(os.getenv("MAX_RUNS")),
     }
     return config
