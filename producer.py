@@ -94,5 +94,31 @@ class MensageriaSimples:
         self.conexao.close()
 
 
+class PubSub:
+    def __init__(self, *args, **kwargs):
+        self.config = DefinicaoEnv()
+        self.conexao = self.AbrirConexao()
+        self.canal = self.conexao.channel()
+        self.EnviaMensagem()
+
+    def AbrirConexao(self):
+        credenciais = pika.PlainCredentials(
+            self.config["user"], self.config["passwd"])
+        conexao = pika.BlockingConnection(pika.ConnectionParameters(
+            self.config["server"], self.config["port"], '/', credenciais))
+        return conexao
+
+    def EnviaMensagem(self):
+        self.canal.exchange_declare(
+            exchange=self.config["exchange"], exchange_type='fanout')
+        for _ in range(self.config["rounds"]):
+            dados = SimulaDadosAPI()
+            self.canal.basic_publish(exchange=self.config["exchange"], routing_key='',
+                                     body=json.dumps(dados))
+            print(f"[x] Enviando '{dados}'")
+
+        self.conexao.close()
+
+
 if __name__ == '__main__':
     MensageriaSimples()
