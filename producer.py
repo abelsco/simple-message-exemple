@@ -80,7 +80,7 @@ class MensageriaSimples:
         credenciais = pika.PlainCredentials(
             self.config["user"], self.config["passwd"])
         conexao = pika.BlockingConnection(pika.ConnectionParameters(
-            self.config.server, self.config["port"], '/', credenciais))
+            self.config["server"], self.config["port"], '/', credenciais))
         return conexao
 
     def EnviaMensagem(self):
