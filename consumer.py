@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 import time
 
+
+def DefinicaoEnv():
 load_dotenv()
 user = os.getenv("RABBITMQ_USER")
 passwd = os.getenv("RABBITMQ_PASS")
