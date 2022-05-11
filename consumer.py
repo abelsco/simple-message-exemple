@@ -1,13 +1,37 @@
 #!.venv/bin python
-import pika
-import sys
+"""
+Código que implementa um consumidor de mensagens do RabbitMQ
+
+### Clases
+ - MensageriaSimples: Padrão de consumo simples por um canal e fila
+ - WorkQueues: Padrão de consumo Work Queues
+ - PubSub: Padrão de consumo Publisher/Subscriber
+"""
 import os
-from dotenv import load_dotenv
+import sys
 import time
+from dotenv import load_dotenv
+import pika
 
 
-def DefinicaoEnv():
+def definicao_env():
+    """
+    Função que realiza a carga das variáveis de ambiente e retorna um dicionário
+
+    ### Chaves do dicionário
+        - user: Usuário de acesso ao RabbitMQ
+        - passwd: Senha de acesso ao RabbitMQ
+        - server: Endereço do servidor RabbitMQ
+        - port: Porta exposta do servidor RabbitMQ
+        - queue: Nome da fila do RabbitMQ
+        - exchange: Nome da exchange do RabbitMQ
+
+    ### Retorno
+        _dict_: Dicionário com as variáveis definidas
+    """
+    # Carrego as variaveis
     load_dotenv()
+    # Defino o dicionário com as variaveis do meu ambiente
     config = {
         "user": os.getenv("RABBITMQ_USER"),
         "passwd": os.getenv("RABBITMQ_PASS"),
@@ -20,23 +44,44 @@ def DefinicaoEnv():
 
 
 class MensageriaSimples:
-    def __init__(self, *args, **kwargs):
-        self.config = DefinicaoEnv()
-        self.conexao = self.AbrirConexao()
-        self.canal = self.conexao.channel()
-        self.RecebeMensagem()
+    """
+    ## Mensageria Simples
 
-    def AbrirConexao(self):
+    Classe que implementa a troca de mensagens com o RabbitMQ
+    atraves de uma canal e uma fila pré estabelicida
+
+    #### Métodos
+
+    - abrir_conexao(self)
+    - recebe_mensagem(self)
+    """
+
+    def __init__(self):
+        self.config = definicao_env()
+        self.conexao = self.abrir_conexao()
+        self.canal = self.conexao.channel()
+        self.recebe_mensagem()
+
+    def abrir_conexao(self):
+        """
+        Método que retorna a conexão criada
+
+        Returns:
+            _BlockingConnection_: Objeto de conexão da biblioteca pika
+        """
         credenciais = pika.PlainCredentials(
             self.config["user"], self.config["passwd"])
         conexao = pika.BlockingConnection(pika.ConnectionParameters(
             self.config["server"], self.config["port"], '/', credenciais))
         return conexao
 
-    def RecebeMensagem(self):
+    def recebe_mensagem(self):
+        """
+        Método de receptação de mensagens do RabbitMQ pelo canal e fila
+        """
         self.canal.queue_declare(queue=self.config["queue"])
 
-        def callback(ch, method, properties, body):
+        def callback(body):
             print(f" [x] Opa recebi a mensagem {body}")
 
         self.canal.basic_consume(
@@ -47,24 +92,47 @@ class MensageriaSimples:
 
 
 class WorkQueues:
-    def __init__(self, *args, **kwargs):
-        self.config = DefinicaoEnv()
-        self.conexao = self.AbrirConexao()
-        self.canal = self.conexao.channel()
-        self.RecebeMensagem()
+    """
+    ## Work Queues
 
-    def AbrirConexao(self):
+    Classe que implementa a troca de mensagens com o RabbitMQ
+    com o padrão Work Queues onde você tem 1 ou mais consumidores
+
+    #### Métodos
+
+    - abrir_conexao(self)
+    - recebe_mensagem(self)
+    """
+
+    def __init__(self):
+        self.config = definicao_env()
+        print(self.config)
+        self.conexao = self.abrir_conexao()
+        self.canal = self.conexao.channel()
+        self.recebe_mensagem()
+
+    def abrir_conexao(self):
+        """
+        Método que retorna a conexão criada
+
+        Returns:
+            _BlockingConnection_: Objeto de conexão da biblioteca pika
+        """
         credenciais = pika.PlainCredentials(
             self.config["user"], self.config["passwd"])
         conexao = pika.BlockingConnection(pika.ConnectionParameters(
             self.config["server"], self.config["port"], '/', credenciais))
         return conexao
 
-    def RecebeMensagem(self):
+    def recebe_mensagem(self):
+        """
+        Método de receptação de mensagens do RabbitMQ pelo canal e fila
+        """
         self.canal.queue_declare(queue=self.config["queue"])
 
-        def callback(ch, method, properties, body):
+        def callback(method, body):
             print(f" [x] Opa recebi a mensagem {body}")
+            # Simulo algum processamento
             time.sleep(body.count(b'.'))
             print(" [x] Feito meu chapa!")
             self.canal.basic_ack(delivery_tag=method.delivery_tag)
@@ -77,20 +145,42 @@ class WorkQueues:
 
 
 class PubSub:
-    def __init__(self, *args, **kwargs):
-        self.config = DefinicaoEnv()
-        self.conexao = self.AbrirConexao()
-        self.canal = self.conexao.channel()
-        self.RecebeMensagem()
+    """
+    ## Publish/Subscribe
 
-    def AbrirConexao(self):
+    Classe que implementa a troca de mensagens com o RabbitMQ
+    no padrão Pub/Sub onde as mansegens são enfileiradas para varios consumidores
+    atraves da exchange
+
+    #### Métodos
+
+    - abrir_conexao(self)
+    - recebe_mensagem(self)
+    """
+
+    def __init__(self):
+        self.config = definicao_env()
+        self.conexao = self.abrir_conexao()
+        self.canal = self.conexao.channel()
+        self.recebe_mensagem()
+
+    def abrir_conexao(self):
+        """
+        Método que retorna a conexão criada
+
+        Returns:
+            _BlockingConnection_: Objeto de conexão da biblioteca pika
+        """
         credenciais = pika.PlainCredentials(
             self.config["user"], self.config["passwd"])
         conexao = pika.BlockingConnection(pika.ConnectionParameters(
             self.config["server"], self.config["port"], '/', credenciais))
         return conexao
 
-    def RecebeMensagem(self):
+    def recebe_mensagem(self):
+        """
+        Método de receptação de mensagens do RabbitMQ pela exchange
+        """
         self.canal.exchange_declare(
             exchange=self.config["exchange"], exchange_type='fanout')
 
@@ -100,7 +190,7 @@ class PubSub:
         self.canal.queue_bind(
             exchange=self.config["exchange"], queue=queue_local)
 
-        def callback(ch, method, properties, body):
+        def callback(body):
             print(f" [x] Opa recebi a mensagem {body}")
 
         self.canal.basic_consume(
@@ -111,6 +201,9 @@ class PubSub:
 
 
 def main():
+    """
+    Função principal do código
+    """
     mode = sys.argv[1].upper()
     print(f'MODE: {mode}')
     if mode == 'PUB_SUB':
@@ -129,4 +222,4 @@ if __name__ == '__main__':
         try:
             sys.exit(0)
         except SystemExit:
-            os._exit(0)
+            os.exit(0)
