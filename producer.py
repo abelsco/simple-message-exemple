@@ -157,11 +157,11 @@ class MensageriaSimples:
 
 class PubSub:
     """
-    ## Mensageria Simples
+    ## Publish/Subscribe
 
     Classe que implementa a troca de mensagens com o RabbitMQ
     no padrão Pub/Sub onde as mansegens são enfileiradas para varios consumidores
-    atravez da exchange
+    atraves da exchange
 
     #### Métodos
 
