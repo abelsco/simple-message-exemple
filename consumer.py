@@ -106,7 +106,6 @@ class WorkQueues:
 
     def __init__(self):
         self.config = definicao_env()
-        print(self.config)
         self.conexao = self.abrir_conexao()
         self.canal = self.conexao.channel()
         self.recebe_mensagem()
