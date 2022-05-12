@@ -81,8 +81,10 @@ class MensageriaSimples:
         """
         self.canal.queue_declare(queue=self.config["queue"])
 
-        def callback(body):
-            print(f" [x] Opa recebi a mensagem {body}")
+        def callback(canal, metodo, propriedade, corpo):
+            print(f" [x] Opa uma mensagem em: {canal}")
+            print(f" ---[x] Com o método {metodo} e propriedade {propriedade}")
+            print(f" ---[xx] Mensagem {corpo}")
 
         self.canal.basic_consume(
             queue=self.config["queue"], on_message_callback=callback, auto_ack=True)
