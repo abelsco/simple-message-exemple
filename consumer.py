@@ -193,8 +193,10 @@ class PubSub:
         self.canal.queue_bind(
             exchange=self.config["exchange"], queue=queue_local)
 
-        def callback(body):
-            print(f" [x] Opa recebi a mensagem {body}")
+        def callback(canal, metodo, propriedade, corpo):
+            print(f" [x] Opa uma mensagem em: {canal}")
+            print(f" ---[x] Com o método {metodo} e propriedade {propriedade}")
+            print(f" ---[xx] Mensagem {corpo}")
 
         self.canal.basic_consume(
             queue=queue_local, on_message_callback=callback, auto_ack=True)
