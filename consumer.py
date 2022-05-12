@@ -131,8 +131,10 @@ class WorkQueues:
         """
         self.canal.queue_declare(queue=self.config["queue"])
 
-        def callback(method, body):
-            print(f" [x] Opa recebi a mensagem {body}")
+        def callback(canal, metodo, propriedade, corpo):
+            print(f" [x] Opa uma mensagem em: {canal}")
+            print(f" ---[x] Com o método {metodo} e propriedade {propriedade}")
+            print(f" ---[xx] Mensagem {corpo}")
             # Simulo algum processamento
             time.sleep(body.count(b'.'))
             print(" [x] Feito meu chapa!")
