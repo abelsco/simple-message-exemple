@@ -136,9 +136,9 @@ class WorkQueues:
             print(f" ---[x] Com o método {metodo} e propriedade {propriedade}")
             print(f" ---[xx] Mensagem {corpo}")
             # Simulo algum processamento
-            time.sleep(body.count(b'.'))
+            time.sleep(corpo.count(b'.'))
             print(" [x] Feito meu chapa!")
-            self.canal.basic_ack(delivery_tag=method.delivery_tag)
+            self.canal.basic_ack(delivery_tag=metodo.delivery_tag)
 
         self.canal.basic_consume(
             queue=self.config["queue"], on_message_callback=callback)
